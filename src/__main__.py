@@ -9,23 +9,27 @@ WINDOW_LEN = int(SCREEN_LEN * 1.25)
 LIST_LEN = SCREEN_LEN // SQR_LEN
 EDGE = SQR_LEN // 16
 
+
 class Game(arcade.Window):
     def __init__(self):
         super().__init__(WINDOW_LEN, WINDOW_LEN, "Minesweeper")
         arcade.set_background_color(arcade.color.ASH_GREY)
 
         self.grid = [[0 for _ in range(LIST_LEN)] for _ in range(LIST_LEN)]
-        mines = random.sample([(x, y) for x in range(LIST_LEN) for y in range(LIST_LEN)], int(LIST_LEN ** 2 / 8))
+        mines = random.sample(
+            [(x, y) for x in range(LIST_LEN) for y in range(LIST_LEN)],
+            int(LIST_LEN**2 / 8),
+        )
         for x, y in mines:
             self.grid[x][y] = -1
-        
+
         for i in range(LIST_LEN):
             for j in range(LIST_LEN):
                 if self.grid[i][j] != -1:
                     self.grid[i][j] = self.get_neighbors(i, j)
-        
+
         self.known = set()
-    
+
     def get_neighbors(self, i, j):
         neighboring_mines = 0
         for x, y in list(itertools.product((0, -1, 1), repeat=2)):
@@ -58,7 +62,7 @@ class Game(arcade.Window):
                         x + SQR_LEN // 6,
                         y + SQR_LEN // 6,
                         arcade.color.BLACK,
-                        25,
+                        23,
                     )
                 else:
                     f = arcade.draw_lrtb_rectangle_filled
@@ -67,11 +71,13 @@ class Game(arcade.Window):
                     x + SQR_LEN - EDGE,
                     y + SQR_LEN - EDGE,
                     y + EDGE,
-                    arcade.color.BLACK
+                    arcade.color.BLACK,
                 )
+
 
 def map_to_coordinate(n: int) -> int:
     return (n - LIST_LEN // 2) * SQR_LEN + int((WINDOW_LEN - SCREEN_LEN) * 2.5)
+
 
 def map_to_index(n: int) -> int:
     return (n - int((WINDOW_LEN - SCREEN_LEN) * 2.5)) // SQR_LEN + LIST_LEN // 2
