@@ -46,7 +46,10 @@ class Game(arcade.Window):
         i = map_to_index(x)
         j = map_to_index(y)
         if _button == arcade.MOUSE_BUTTON_RIGHT:
-            self.flags.add((i, j))
+            if (i, j) in self.flags:
+                self.flags.remove((i, j))
+            else:
+                self.flags.add((i, j))
         elif _button == arcade.MOUSE_BUTTON_LEFT:
             if not self.known:
                 self.start(i, j)
@@ -59,9 +62,9 @@ class Game(arcade.Window):
         while neighbors:
             i, j = neighbors.popleft()
             visited.add((i, j))
-            self.known.add((i, j))
             if self.grid[i][j] == 0:
                 neighbors += [x for x in self.get_neighbors(i, j) if x not in visited]
+            self.known.add((i, j))
         
     def draw_squares(self):
         for j in range(LIST_LEN):
