@@ -1,7 +1,7 @@
 import arcade
 import itertools
 import random
-import time
+from collections import deque
 
 SQR_LEN = 35
 SCREEN_LEN = 512
@@ -49,10 +49,20 @@ class Game(arcade.Window):
             self.flags.add((i, j))
         elif _button == arcade.MOUSE_BUTTON_LEFT:
             if not self.known:
-                for neighbor in self.get_neighbors(i, j):
-                    self.known.add(neighbor)
+                self.start(i, j)
             self.known.add((i, j))
 
+
+    def start(self, i, j):
+        neighbors = deque(self.get_neighbors(i, j))
+        visited = set()
+        while neighbors:
+            i, j = neighbors.popleft()
+            visited.add((i, j))
+            self.known.add((i, j))
+            if self.grid[i][j] == 0:
+                neighbors += [x for x in self.get_neighbors(i, j) if x not in visited]
+        
     def draw_squares(self):
         for j in range(LIST_LEN):
             y = map_to_coordinate(j)
