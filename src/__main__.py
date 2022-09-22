@@ -16,18 +16,6 @@ class Game(arcade.Window):
         arcade.set_background_color(arcade.color.ASH_GREY)
 
         self.grid = [[0 for _ in range(LIST_LEN)] for _ in range(LIST_LEN)]
-        mines = random.sample(
-            [(x, y) for x in range(LIST_LEN) for y in range(LIST_LEN)],
-            int(LIST_LEN**2 / 8),
-        )
-        for x, y in mines:
-            self.grid[x][y] = -1
-
-        for i in range(LIST_LEN):
-            for j in range(LIST_LEN):
-                if self.grid[i][j] != -1:
-                    self.grid[i][j] = len([x for x in self.get_neighbors(i, j) if self.grid[x[0]][x[1]] == -1])
-
         self.known = set()
         self.flags = set()
 
@@ -57,6 +45,18 @@ class Game(arcade.Window):
 
 
     def start(self, i, j):
+        mines = random.sample(
+            [(x, y) for x in range(LIST_LEN) for y in range(LIST_LEN) if (x, y) not in self.get_neighbors(i, j)],
+            int(LIST_LEN**2 / 8),
+        )
+        for x, y in mines:
+            self.grid[x][y] = -1
+
+        for x in range(LIST_LEN):
+            for y in range(LIST_LEN):
+                if self.grid[x][y] != -1:
+                    self.grid[x][y] = len([coord for coord in self.get_neighbors(x, y) if self.grid[coord[0]][coord[1]] == -1])
+
         neighbors = deque(self.get_neighbors(i, j))
         visited = set()
         while neighbors:
@@ -66,6 +66,7 @@ class Game(arcade.Window):
                 neighbors += [x for x in self.get_neighbors(i, j) if x not in visited]
             self.known.add((i, j))
         
+
     def draw_squares(self):
         for j in range(LIST_LEN):
             y = map_to_coordinate(j)
