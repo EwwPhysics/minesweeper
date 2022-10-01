@@ -2,12 +2,18 @@ import arcade
 import itertools
 import random
 from collections import deque
+from enum import Enum
 
 SQR_LEN = 35
 SCREEN_LEN = 512
 WINDOW_LEN = int(SCREEN_LEN * 1.25)
 LIST_LEN = SCREEN_LEN // SQR_LEN
 EDGE = SQR_LEN // 16
+
+class GameState(Enum):
+    PLAYING = 0
+    LOST = 1
+    WON = 2
 
 
 class Game(arcade.Window):
@@ -18,6 +24,8 @@ class Game(arcade.Window):
         self.grid = [[0 for _ in range(LIST_LEN)] for _ in range(LIST_LEN)]
         self.known = set()
         self.flags = set()
+        self.mines = set()
+        self.state = GameState.PLAYING
 
     def get_neighbors(self, i, j):
         neighboring_mines = []
@@ -29,19 +37,39 @@ class Game(arcade.Window):
     def on_draw(self):
         arcade.start_render()
         self.draw_squares()
+        if self.state is GameState.LOST:
+            arcade.draw_text(
+                "You Lose D:",
+                WINDOW_LEN // 2, int(WINDOW_LEN * (15 / 16)), (255, 0, 0),
+                anchor_x="center",
+                bold=True,
+            )
 
-    def on_mouse_press(self, x, y, _button, _modifiers):
-        i = map_to_index(x)
-        j = map_to_index(y)
-        if _button == arcade.MOUSE_BUTTON_RIGHT:
-            if (i, j) in self.flags:
-                self.flags.remove((i, j))
-            else:
-                self.flags.add((i, j))
-        elif _button == arcade.MOUSE_BUTTON_LEFT:
-            if not self.known:
-                self.start(i, j)
-            self.known.add((i, j))
+    def on_mouse_press(self, x, y, _button, _):
+        if self.state is not GameState.PLAYING:
+            i = map_to_index(x)
+            j = map_to_index(y)
+            if _button == arcade.MOUSE_BUTTON_RIGHT:
+                if (i, j) in self.flags:
+                    self.flags.remove((i, j))
+                else:
+                    self.flags.add((i, j))
+            elif _button == arcade.MOUSE_BUTTON_LEFT:
+                if not self.known:
+                    self.start(i, j)
+                neighboring_mines = self.grid[i][j]
+                if neighboring_mines == 0:
+                    self.bfs_expand(i, j)
+                elif neighboring_mines == -1:
+                    # Lost D:
+                    self.lost = True
+                    self.known.add((i, j))
+                else:
+                    self.known.add((i, j))
+
+            # In order for the player to win, they must uncover all non-mine squares
+            if len(self.known) == LIST_LEN ** 2 - len(self.mines):
+                self.state = GameState.WON
 
 
     def start(self, i, j):
@@ -49,6 +77,7 @@ class Game(arcade.Window):
             [(x, y) for x in range(LIST_LEN) for y in range(LIST_LEN) if (x, y) not in self.get_neighbors(i, j)],
             int(LIST_LEN**2 / 8),
         )
+        self.mines = mines
         for x, y in mines:
             self.grid[x][y] = -1
 
@@ -57,6 +86,9 @@ class Game(arcade.Window):
                 if self.grid[x][y] != -1:
                     self.grid[x][y] = len([coord for coord in self.get_neighbors(x, y) if self.grid[coord[0]][coord[1]] == -1])
 
+        self.bfs_expand(i, j)
+
+    def bfs_expand(self, i, j):
         neighbors = deque(self.get_neighbors(i, j))
         visited = set()
         while neighbors:
@@ -65,7 +97,6 @@ class Game(arcade.Window):
             if self.grid[i][j] == 0:
                 neighbors += [x for x in self.get_neighbors(i, j) if x not in visited]
             self.known.add((i, j))
-        
 
     def draw_squares(self):
         for j in range(LIST_LEN):
@@ -77,7 +108,7 @@ class Game(arcade.Window):
                         x + EDGE,
                         x + SQR_LEN - EDGE,
                         y + SQR_LEN - EDGE,
-                        y + EDGE, 
+                        y + EDGE,
                         arcade.color.BLACK,
                     )
                     if self.grid[i][j] != 0:
