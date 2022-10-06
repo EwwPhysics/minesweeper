@@ -71,10 +71,14 @@ class Game(arcade.Window):
             if len(self.known) == LIST_LEN ** 2 - len(self.mines):
                 self.state = GameState.WON
 
-
     def start(self, i, j):
         mines = random.sample(
-            [(x, y) for x in range(LIST_LEN) for y in range(LIST_LEN) if (x, y) not in self.get_neighbors(i, j)],
+            [
+                (x, y)
+                for x in range(LIST_LEN)
+                for y in range(LIST_LEN)
+                if (x, y) not in self.get_neighbors(i, j)
+            ],
             int(LIST_LEN**2 / 8),
         )
         self.mines = mines
@@ -84,7 +88,13 @@ class Game(arcade.Window):
         for x in range(LIST_LEN):
             for y in range(LIST_LEN):
                 if self.grid[x][y] != -1:
-                    self.grid[x][y] = len([coord for coord in self.get_neighbors(x, y) if self.grid[coord[0]][coord[1]] == -1])
+                    self.grid[x][y] = len(
+                        [
+                            coord
+                            for coord in self.get_neighbors(x, y)
+                            if self.grid[coord[0]][coord[1]] == -1
+                        ]
+                    )
 
         self.bfs_expand(i, j)
 
@@ -123,9 +133,9 @@ class Game(arcade.Window):
                 elif (i, j) in self.flags:
                     flag = arcade.Sprite(
                         "src/images/flag.jpeg",
-                        scale = 0.12,
-                        center_x = x + SQR_LEN // 2,
-                        center_y = y + SQR_LEN // 2,
+                        scale=0.12,
+                        center_x=x + SQR_LEN // 2,
+                        center_y=y + SQR_LEN // 2,
                     )
                     flag.draw()
 
