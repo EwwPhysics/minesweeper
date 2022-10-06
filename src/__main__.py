@@ -38,6 +38,26 @@ class Game(arcade.Window):
     def on_draw(self):
         arcade.start_render()
         self.draw_squares()
+
+        self.remaining_mines = len(self.mines) - len(self.flags)
+
+        flag = arcade.Sprite(
+            "src/images/flag.jpeg",
+            center_x=WINDOW_LEN - 100 - SQR_LEN * 1.5,
+            center_y=int(WINDOW_LEN * (15 / 16)),
+            scale=0.20,
+        )
+        flag.draw()
+
+        arcade.draw_text(
+                self.remaining_mines,
+                WINDOW_LEN - 100,
+                int(WINDOW_LEN * (15 / 16)),
+                anchor_x="center",
+                anchor_y="center",
+                font_size=20,
+        )
+
         if self.state is GameState.LOST:
             arcade.draw_text(
                 "You Lose D:",
@@ -75,7 +95,7 @@ class Game(arcade.Window):
             self.state = GameState.WON
 
     def start(self, i, j):
-        mines = random.sample(
+        self.mines = random.sample(
             [
                 (x, y)
                 for x in range(LIST_LEN)
@@ -84,8 +104,7 @@ class Game(arcade.Window):
             ],
             int(LIST_LEN**2 / 8),
         )
-        self.mines = mines
-        for x, y in mines:
+        for x, y in self.mines:
             self.grid[x][y] = -1
 
         for x in range(LIST_LEN):
