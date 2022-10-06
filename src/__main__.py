@@ -10,6 +10,7 @@ WINDOW_LEN = int(SCREEN_LEN * 1.25)
 LIST_LEN = SCREEN_LEN // SQR_LEN
 EDGE = SQR_LEN // 16
 
+
 class GameState(Enum):
     PLAYING = 0
     LOST = 1
@@ -40,13 +41,15 @@ class Game(arcade.Window):
         if self.state is GameState.LOST:
             arcade.draw_text(
                 "You Lose D:",
-                WINDOW_LEN // 2, int(WINDOW_LEN * (15 / 16)), (255, 0, 0),
+                WINDOW_LEN // 2,
+                int(WINDOW_LEN * (15 / 16)),
+                (255, 0, 0),
                 anchor_x="center",
                 bold=True,
             )
 
     def on_mouse_press(self, x, y, _button, _):
-        if self.state is not GameState.PLAYING:
+        if self.state is GameState.PLAYING:
             i = map_to_index(x)
             j = map_to_index(y)
             if _button == arcade.MOUSE_BUTTON_RIGHT:
@@ -57,19 +60,19 @@ class Game(arcade.Window):
             elif _button == arcade.MOUSE_BUTTON_LEFT:
                 if not self.known:
                     self.start(i, j)
-                neighboring_mines = self.grid[i][j]
-                if neighboring_mines == 0:
+                value = self.grid[i][j]
+                if value == 0:
                     self.bfs_expand(i, j)
-                elif neighboring_mines == -1:
+                elif value == -1:
                     # Lost D:
-                    self.lost = True
+                    self.state = GameState.LOST
                     self.known.add((i, j))
                 else:
                     self.known.add((i, j))
 
-            # In order for the player to win, they must uncover all non-mine squares
-            if len(self.known) == LIST_LEN ** 2 - len(self.mines):
-                self.state = GameState.WON
+        # In order for the player to win, they must uncover all non-mine squares
+        if len(self.known) == LIST_LEN**2 - len(self.mines):
+            self.state = GameState.WON
 
     def start(self, i, j):
         mines = random.sample(
