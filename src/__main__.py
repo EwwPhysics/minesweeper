@@ -125,6 +125,15 @@ class Game(arcade.Window):
                     arcade.color.BLACK,
                 )
 
+                if (i, j) in self.known:
+                    arcade.draw_lrtb_rectangle_filled(
+                        x + EDGE,
+                        x + SQR_LEN - EDGE,
+                        y + SQR_LEN - EDGE,
+                        y + EDGE,
+                        arcade.color.ANTIQUE_WHITE,
+                    )
+
                 if (i, j) in self.flags:
                     flag = arcade.Sprite(
                         "src/images/flag.jpeg",
