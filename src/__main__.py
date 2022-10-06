@@ -116,6 +116,7 @@ class Game(arcade.Window):
             y = map_to_coordinate(j)
             for i in range(LIST_LEN):
                 x = map_to_coordinate(i)
+
                 arcade.draw_lrtb_rectangle_outline(
                     x + EDGE,
                     x + SQR_LEN - EDGE,
@@ -123,16 +124,8 @@ class Game(arcade.Window):
                     y + EDGE,
                     arcade.color.BLACK,
                 )
-                if (i, j) in self.known and self.grid[i][j] != 0:
-                    arcade.draw_text(
-                        self.grid[i][j],
-                        x + SQR_LEN // 4,
-                        y + SQR_LEN // 6,
-                        arcade.color.BLACK,
-                        23,
-                    )
 
-                elif (i, j) in self.flags:
+                if (i, j) in self.flags:
                     flag = arcade.Sprite(
                         "src/images/flag.jpeg",
                         scale=0.12,
@@ -140,6 +133,25 @@ class Game(arcade.Window):
                         center_y=y + SQR_LEN // 2,
                     )
                     flag.draw()
+
+                elif (i, j) in self.known and self.grid[i][j] == -1:
+                    mine = arcade.Sprite(
+                        "src/images/mine.png",
+                        scale=0.08,
+                        center_x=x + SQR_LEN // 2,
+                        center_y=y + SQR_LEN // 2,
+                    )
+                    mine.draw()
+
+
+                elif (i, j) in self.known and self.grid[i][j] != 0:
+                    arcade.draw_text(
+                        self.grid[i][j],
+                        x + SQR_LEN // 4,
+                        y + SQR_LEN // 6,
+                        arcade.color.BLACK,
+                        23,
+                    )
 
                 elif (i, j) not in self.known:
                     arcade.draw_lrtb_rectangle_filled(
