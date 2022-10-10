@@ -37,16 +37,48 @@ class Game(arcade.Window):
 
     def on_draw(self):
         arcade.start_render()
-        self.draw_squares()
         if self.state is GameState.LOST:
             arcade.draw_text(
                 "You Lose D:",
                 WINDOW_LEN // 2,
-                int(WINDOW_LEN * (15 / 16)),
+                WINDOW_LEN // 2,
                 (255, 0, 0),
                 anchor_x="center",
                 bold=True,
+                font_size=50,
             )
+        elif self.state is GameState.WON:
+            arcade.draw_text(
+                "You won!!!",
+                WINDOW_LEN // 2,
+                WINDOW_LEN // 2,
+                (0, 255, 0),
+                anchor_x="center",
+                bold=True,
+                font_size=50,
+            )
+        else:
+            self.draw_squares()
+
+            self.remaining_mines = int(LIST_LEN**2 / 8) - len(self.flags)
+
+            flag = arcade.Sprite(
+                "src/images/flag.jpeg",
+                center_x=WINDOW_LEN - 100 - SQR_LEN * 1.5,
+                center_y=int(WINDOW_LEN * (15 / 16)),
+                scale=0.20,
+            )
+            flag.draw()
+
+            arcade.draw_text(
+                    self.remaining_mines,
+                    WINDOW_LEN - 100,
+                    int(WINDOW_LEN * (15 / 16)),
+                    anchor_x="center",
+                    anchor_y="center",
+                    font_size=20,
+            )
+
 
     def on_mouse_press(self, x, y, _button, _):
         if self.state is GameState.PLAYING:
@@ -75,7 +107,7 @@ class Game(arcade.Window):
             self.state = GameState.WON
 
     def start(self, i, j):
-        mines = random.sample(
+        self.mines = random.sample(
             [
                 (x, y)
                 for x in range(LIST_LEN)
@@ -84,8 +116,7 @@ class Game(arcade.Window):
             ],
             int(LIST_LEN**2 / 8),
         )
-        self.mines = mines
-        for x, y in mines:
+        for x, y in self.mines:
             self.grid[x][y] = -1
 
         for x in range(LIST_LEN):
@@ -116,24 +147,25 @@ class Game(arcade.Window):
             y = map_to_coordinate(j)
             for i in range(LIST_LEN):
                 x = map_to_coordinate(i)
+
+                arcade.draw_lrtb_rectangle_outline(
+                    x + EDGE,
+                    x + SQR_LEN - EDGE,
+                    y + SQR_LEN - EDGE,
+                    y + EDGE,
+                    arcade.color.BLACK,
+                )
+
                 if (i, j) in self.known:
-                    arcade.draw_lrtb_rectangle_outline(
+                    arcade.draw_lrtb_rectangle_filled(
                         x + EDGE,
                         x + SQR_LEN - EDGE,
                         y + SQR_LEN - EDGE,
                         y + EDGE,
-                        arcade.color.BLACK,
+                        arcade.color.ANTIQUE_WHITE,
                     )
-                    if self.grid[i][j] != 0:
-                        arcade.draw_text(
-                            self.grid[i][j],
-                            x + SQR_LEN // 4,
-                            y + SQR_LEN // 6,
-                            arcade.color.BLACK,
-                            23,
-                        )
 
-                elif (i, j) in self.flags:
+                if (i, j) in self.flags:
                     flag = arcade.Sprite(
                         "src/images/flag.jpeg",
                         scale=0.12,
@@ -142,7 +174,26 @@ class Game(arcade.Window):
                     )
                     flag.draw()
 
-                else:
+                elif (i, j) in self.known and self.grid[i][j] == -1:
+                    mine = arcade.Sprite(
+                        "src/images/mine.png",
+                        scale=0.08,
+                        center_x=x + SQR_LEN // 2,
+                        center_y=y + SQR_LEN // 2,
+                    )
+                    mine.draw()
+
+
+                elif (i, j) in self.known and self.grid[i][j] != 0:
+                    arcade.draw_text(
+                        self.grid[i][j],
+                        x + SQR_LEN // 4,
+                        y + SQR_LEN // 6,
+                        arcade.color.BLACK,
+                        23,
+                    )
+
+                elif (i, j) not in self.known:
                     arcade.draw_lrtb_rectangle_filled(
                         x + EDGE,
                         x + SQR_LEN - EDGE,
