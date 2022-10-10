@@ -37,36 +37,38 @@ class Game(arcade.Window):
 
     def on_draw(self):
         arcade.start_render()
-        self.draw_squares()
-
-        self.remaining_mines = len(self.mines) - len(self.flags)
-
-        flag = arcade.Sprite(
-            "src/images/flag.jpeg",
-            center_x=WINDOW_LEN - 100 - SQR_LEN * 1.5,
-            center_y=int(WINDOW_LEN * (15 / 16)),
-            scale=0.20,
-        )
-        flag.draw()
-
-        arcade.draw_text(
-                self.remaining_mines,
-                WINDOW_LEN - 100,
-                int(WINDOW_LEN * (15 / 16)),
-                anchor_x="center",
-                anchor_y="center",
-                font_size=20,
-        )
-
         if self.state is GameState.LOST:
             arcade.draw_text(
                 "You Lose D:",
                 WINDOW_LEN // 2,
-                int(WINDOW_LEN * (15 / 16)),
+                WINDOW_LEN // 2,
                 (255, 0, 0),
                 anchor_x="center",
                 bold=True,
+                font_size=50,
             )
+        else:
+            self.draw_squares()
+
+            self.remaining_mines = int(LIST_LEN**2 / 8) - len(self.flags)
+
+            flag = arcade.Sprite(
+                "src/images/flag.jpeg",
+                center_x=WINDOW_LEN - 100 - SQR_LEN * 1.5,
+                center_y=int(WINDOW_LEN * (15 / 16)),
+                scale=0.20,
+            )
+            flag.draw()
+
+            arcade.draw_text(
+                    self.remaining_mines,
+                    WINDOW_LEN - 100,
+                    int(WINDOW_LEN * (15 / 16)),
+                    anchor_x="center",
+                    anchor_y="center",
+                    font_size=20,
+            )
+
 
     def on_mouse_press(self, x, y, _button, _):
         if self.state is GameState.PLAYING:
