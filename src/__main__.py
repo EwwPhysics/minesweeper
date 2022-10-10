@@ -47,6 +47,16 @@ class Game(arcade.Window):
                 bold=True,
                 font_size=50,
             )
+        elif self.state is GameState.WON:
+            arcade.draw_text(
+                "You won!!!",
+                WINDOW_LEN // 2,
+                WINDOW_LEN // 2,
+                (0, 255, 0),
+                anchor_x="center",
+                bold=True,
+                font_size=50,
+            )
         else:
             self.draw_squares()
 
