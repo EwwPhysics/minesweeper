@@ -1,15 +1,9 @@
+from .constants import *
 import arcade
 import itertools
 import random
 from collections import deque
 from enum import Enum
-
-SQR_LEN = 35
-SCREEN_LEN = 512
-WINDOW_LEN = int(SCREEN_LEN * 1.25)
-LIST_LEN = SCREEN_LEN // SQR_LEN
-EDGE = SQR_LEN // 16
-
 
 class GameState(Enum):
     PLAYING = 0
